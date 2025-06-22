@@ -1,8 +1,8 @@
 const fs = require('fs');
 const http = require('http');
+const express = require('express');
 
-
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
  const server = http.createServer((req,res) =>{
     const url = new URL(req.url, `http://${req.headers.host}`);
     switch(url.pathname) {
