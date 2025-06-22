@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang = 'uk'>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Питання про столиці</title>
+    <style>
+        
+        input[type="checkbox"] {
+
+  width: 50px;
+  height: 50px;
+  border: 10px solid #333;
+
+        }
+        div{
+            text-align: center;
+        }
+/* Текст у label з відступом */
+label {
+  cursor: pointer;
+  margin-left: 10px;
+  user-select: none;
+}
+           h1{
+            text-align: center;
+            color: #333;
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+            background:#f0b9b9;
+            
+           }
+           body{
+            background-color: rgb(155, 148, 151);
+           }
+           h3{
+            color: #333;
+            font-family: Arial, sans-serif;
+            font-size: 2em;
+            text-align: center;
+           }
+              label{
+                color: #333;
+                font-family: Arial, sans-serif;
+                font-size: 1em;
+                margin-left: 20px;
+                
+                
+              }
+              #que-1, #que-2{
+                display:flex;
+                align-items:flex-start; 
+                flex-direction:column;
+              }
+              
+        </style>
+</head>
+<body>
+    <h1>Fuhrershein 2024. Frage</h1>
+    <form id = 'form'>
+    <div id="que-1">
+        <h3 id="q-1"></h3>
+        <span></span><label for="answ-1" id ='ans0-1'></label><input id='answ-1' type='checkbox' name = 'choice.q-1'/> </span>
+        <span></span><label for="answ-2" id ='ans0-2'></label><input id='answ-2' type='checkbox' name = 'choice.q-1' /></span>
+        <span></span><label for="answ-3" id = 'ans0-3'></label><input id='answ-3' type='checkbox' name = 'choice.q-1'/> </span>
+    </div>
+    <div id="que-2">
+        <h3 id="q-2"></h3>
+        <label for="answ-4" id ='ans1-1'></label><input id='answ-4' type='checkbox' name = 'choice.q-2' />
+        <label for="answ-5" id ='ans1-2'></label><input id='answ-5' type='checkbox' name = 'choice.q-2' />
+        <label for="answ-6" id ='ans1-3'></label><input id='answ-6' type='checkbox' name = 'choice.q-2' />
+    </div>
+    <button type="submit" id="submit">Отримати результат</button>
+    </form>
+     <h4 id="resultat"></h4>
+
+
+    <script>
+     
+        function getQuestion(q,ans='',que){
+            fetch(`http://localhost:3000/?${q}=0${ans}`).then(response => response.text()).then(text =>{
+                if(ans===''){
+                 const questions = text
+                 q1 = document.getElementById(`q-${q}`);
+                 q1.innerHTML = text;
+                }
+                else {
+                    const answers1 = text;
+                    
+                    const answers2 = answers1.replace('[','').replace(']','').split(',');
+                    
+                    answers = [];
+                    for (let i = 0;i<answers2.length;i++) {
+                        answers[i] = answers2[i].replace('"',"").replace('"',"")
+                    }
+                    
+         
+
+                    for(let i = 1; i <= answers.length; i++) {
+                        ans = document.getElementById(`${que}-${i}`);
+                        const input = document.getElementById(ans.getAttribute('for'));
+                        
+                        console.log(answers[i-1]);
+                        
+                        ans.innerHTML = answers[i-1];
+                        input.value = answers[i-1] ;
+                        
+                    
+                    }
+                    
+                   
+                }
+            })
+        }
+      
+        document.getElementById('form').addEventListener('submit', function (event){
+            const checkedQ1 = document.querySelectorAll('input[name="choice.q-1"]:checked');
+            const checkedQ2 = document.querySelectorAll('input[name="choice.q-2"]:checked');
+            if (checkedQ1.length === 0 || checkedQ2.length === 0) {
+                event.preventDefault(); // Запобігаємо відправці форми
+                alert('Будь ласка, оберіть хоча б один варіант для кожного питання.');
+                return;
+            }
+            event.preventDefault()// Запобігаємо перезавантаженню сторінки
+            console.log('submit');
+          
+            let submit = document.getElementById('submit');
+            submit.style.display ='none';
+             getResult()
+            
+        })
+        function getResult() {
+                const selectedQ1 = Array.from(document.querySelectorAll('input[name="choice.q-1"]:checked')).map(cb => cb.value);
+    const selectedQ2 = Array.from(document.querySelectorAll('input[name="choice.q-2"]:checked')).map(cb => cb.value);
+
+    // Вивід у консоль
+    console.log('Вибрано для питання 1:', selectedQ1);
+    console.log('Вибрано для питання 2:', selectedQ2);
+            fetch('http://localhost:3000/',{method: 'POST', headers: {'Content-Type': 'text/plain' }, body: `${selectedQ1}|${selectedQ2}`}).then(response => response.text()).then(text => {
+                const result = document.getElementById('resultat');
+                result.innerHTML = text;
+            });
+        }
+        getQuestion('1');
+        getQuestion('2');
+        getQuestion('1',ans = '&ans-1', que = 'ans0');
+        getQuestion('1',ans = '&ans-2', que = 'ans1');
+
+    </script>
+</body>
+</html>
